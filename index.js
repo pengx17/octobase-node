@@ -246,6 +246,7 @@ if (!nativeBinding) {
   throw new Error(`Failed to load native binding`)
 }
 
-const { sum } = nativeBinding
+const { Storage, Workspace } = nativeBinding
 
-module.exports.sum = sum
+module.exports.Storage = Storage
+module.exports.Workspace = Workspace

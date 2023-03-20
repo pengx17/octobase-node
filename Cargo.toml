@@ -8,11 +8,20 @@ crate-type = ["cdylib"]
 
 [dependencies]
 # Default enable napi4 feature, see https://nodejs.org/api/n-api.html#node-api-version-matrix
-napi = { version = "2.11.1", default-features = false, features = ["napi4"] }
-napi-derive = "2.11.0"
+napi = { version = "2.11.2", default-features = false, features = ["napi4"] }
+napi-derive = "2.11.1"
+jwst = { git = "https://github.com/toeverything/OctoBase", rev = "e38cfac",  package = "jwst" }
+jwst-storage = { git = "https://github.com/toeverything/OctoBase", rev = "e38cfac", package = "jwst-storage",  features = [ "sqlite"] }
+cloud-database = { git = "https://github.com/toeverything/OctoBase", rev = "e38cfac", package = "cloud-database", features = [ "sqlite"] }
+jwst-rpc = { git = "https://github.com/toeverything/OctoBase", rev = "e38cfac", package = "jwst-rpc" }
+lib0 = "0.16.3"
+tokio = "1.24.2"
+yrs = "0.16.3"
 
 [build-dependencies]
 napi-build = "2.0.1"
 
-[profile.release]
-lto = true
+[patch.crates-io]
+rust-embed = { git = "https://github.com/pyrossh/rust-embed", rev = "7c0fc42" }
+lib0 = { git = "https://github.com/toeverything/y-crdt", rev = "a3f7263" }
+yrs = { git = "https://github.com/toeverything/y-crdt", rev = "a3f7263" }
