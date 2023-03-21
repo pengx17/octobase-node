@@ -43,33 +43,36 @@ impl Storage {
     if let Some(storage) = &self.storage {
       let storage_handle = storage.read().await;
       let blobs = storage_handle.blobs();
-      if let Ok(mut file_stream) = blobs.get_blob(workspace_id.clone(), id.clone()).await {
-        // Read all of the chunks into a vector.
-        let mut stream_contents = Vec::new();
-        let mut error_message = "".to_string();
-        while let Some(chunk) = file_stream.next().await {
-          match chunk {
-            Ok(chunk_bytes) => stream_contents.extend_from_slice(&chunk_bytes),
-            Err(err) => {
-              error_message = format!(
-                "Failed to read blob file {}/{} from stream, error: {}",
-                workspace_id.clone().unwrap_or_default().to_string(),
-                id,
-                err
-              );
-            }
+
+      let mut file_stream = blobs.get_blob(workspace_id.clone(), id.clone()).await.map_err(|e| {
+        Error::new(
+          Status::GenericFailure,
+          format!(
+            "Failed to get blob file {}/{} from storage, error: {}",
+            workspace_id.clone().unwrap_or_default().to_string(),
+            id,
+            e
+          ),
+        )
+      })?;
+
+      // Read all of the chunks into a vector.
+      let mut stream_contents = Vec::new();
+      while let Some(chunk) = file_stream.next().await {
+        match chunk {
+          Ok(chunk_bytes) => stream_contents.extend_from_slice(&chunk_bytes),
+          Err(err) => {
+            let error_message = format!(
+              "Failed to read blob file {}/{} from stream, error: {}",
+              workspace_id.clone().unwrap_or_default().to_string(),
+              id,
+              err
+            );
+            return Err(Error::new(Status::GenericFailure, error_message));
           }
         }
-        if error_message.len() > 0 {
-          return Err(Error::new(Status::GenericFailure, error_message));
-        }
-        return Ok(stream_contents.into());
-      } else {
-        return Err(Error::new(
-          Status::GenericFailure,
-          "Storage is not connected",
-        ));
       }
+      Ok(stream_contents.into())
     } else {
       return Err(Error::new(
         Status::GenericFailure,
