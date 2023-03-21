@@ -1,10 +1,11 @@
 use crate::Workspace;
-use jwst::{error, info, DocStorage};
+use jwst::{error, info, BlobStorage, DocStorage};
 use jwst_rpc::start_client;
 use jwst_storage::JwstStorage as AutoStorage;
 use std::sync::Arc;
 use tokio::{runtime::Runtime, sync::RwLock};
-
+use futures::prelude::*;
+use napi::bindgen_prelude::*;
 use napi::{Error, Result, Status};
 
 #[napi]
@@ -38,6 +39,46 @@ impl Storage {
   }
 
   #[napi]
+  pub async fn get_blob(&self, workspace_id: Option<String>, id: String) -> Result<Buffer> {
+    if let Some(storage) = &self.storage {
+      let storage_handle = storage.read().await;
+      let blobs = storage_handle.blobs();
+      if let Ok(mut file_stream) = blobs.get_blob(workspace_id.clone(), id.clone()).await {
+        // Read all of the chunks into a vector.
+        let mut stream_contents = Vec::new();
+        let mut error_message = "".to_string();
+        while let Some(chunk) = file_stream.next().await {
+          match chunk {
+            Ok(chunk_bytes) => stream_contents.extend_from_slice(&chunk_bytes),
+            Err(err) => {
+              error_message = format!(
+                "Failed to read blob file {}/{} from stream, error: {}",
+                workspace_id.clone().unwrap_or_default().to_string(),
+                id,
+                err
+              );
+            }
+          }
+        }
+        if error_message.len() > 0 {
+          return Err(Error::new(Status::GenericFailure, error_message));
+        }
+        return Ok(stream_contents.into());
+      } else {
+        return Err(Error::new(
+          Status::GenericFailure,
+          "Storage is not connected",
+        ));
+      }
+    } else {
+      return Err(Error::new(
+        Status::GenericFailure,
+        "Storage is not connected",
+      ));
+    }
+  }
+
+  #[napi]
   pub fn connect(&mut self, workspace_id: String, remote: String) -> Option<Workspace> {
     match self.sync(workspace_id, remote) {
       Ok(workspace) => Some(workspace),
@@ -54,11 +95,13 @@ impl Storage {
     if let Some(storage) = &self.storage {
       let rt = Runtime::new().unwrap();
 
-      let mut workspace = rt.block_on(async move {
-        let storage = storage.read().await;
+      let mut workspace = rt
+        .block_on(async move {
+          let storage = storage.read().await;
 
-        start_client(&storage, workspace_id, remote).await
-      }).map_err(|e| Error::new(Status::GenericFailure, e.to_string()))?;
+          start_client(&storage, workspace_id, remote).await
+        })
+        .map_err(|e| Error::new(Status::GenericFailure, e.to_string()))?;
 
       let (sub, workspace) = {
         let id = workspace.id();

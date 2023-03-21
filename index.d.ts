@@ -6,6 +6,7 @@
 export class Storage {
   constructor(path: string)
   error(): string | null
+  getBlob(workspaceId: string | undefined | null, id: string): Promise<Buffer>
   connect(workspaceId: string, remote: string): Workspace | null
   sync(workspaceId: string, remote: string): Workspace
 }
