@@ -1,0 +1,21 @@
+lockfileVersion: 5.4
+
+specifiers:
+  '@napi-rs/cli': ^2.14.8
+  '@types/node': ^18.15.5
+
+devDependencies:
+  '@napi-rs/cli': 2.15.0
+  '@types/node': 18.15.5
+
+packages:
+
+  /@napi-rs/cli/2.15.0:
+    resolution: {integrity: sha512-RDDr7ZF0cgbd37+NBGeQOjP7Tm/iNM+y3FmrT5bVQBXLePOTuKVC/dBsdN5UZv3Sl2XAwEvBfaGR90E0d8AA6g==}
+    engines: {node: '>= 10'}
+    hasBin: true
+    dev: true
+
+  /@types/node/18.15.5:
+    resolution: {integrity: sha512-Ark2WDjjZO7GmvsyFFf81MXuGTA/d6oP38anyxWOL6EREyBKAxKoFHwBhaZxCfLRLpO8JgVXwqOwSwa7jRcjew==}
+    dev: true

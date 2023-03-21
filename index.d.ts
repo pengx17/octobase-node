@@ -14,7 +14,7 @@ export class Workspace {
   constructor(id: string)
   id(): string
   clientId(): number
-  static search(self: Workspace, query: string): string
-  static getSearchIndex(self: Workspace): Array<string>
-  static setSearchIndex(self: Workspace, fields: Array<string>): boolean
+  search(query: string): string
+  getSearchIndex(): Array<string>
+  setSearchIndex(fields: Array<string>): boolean
 }

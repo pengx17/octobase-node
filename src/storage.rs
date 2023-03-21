@@ -21,6 +21,7 @@ impl Storage {
   pub fn new(path: String) -> Self {
     let rt = Runtime::new().unwrap();
 
+    // FIXME: do not use block_on
     match rt.block_on(AutoStorage::new(&format!("sqlite:{path}?mode=rwc"))) {
       Ok(pool) => Self {
         storage: Some(Arc::new(RwLock::new(pool))),
@@ -98,6 +99,7 @@ impl Storage {
     if let Some(storage) = &self.storage {
       let rt = Runtime::new().unwrap();
 
+      // FIXME: do not use block_on
       let mut workspace = rt
         .block_on(async move {
           let storage = storage.read().await;

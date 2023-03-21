@@ -56,7 +56,7 @@ impl Workspace {
     // }
 
     #[napi]
-    pub fn search(self: &Workspace, query: String) -> String {
+    pub fn search(&self, query: String) -> String {
         self.workspace.search_result(query)
     }
 
@@ -73,12 +73,12 @@ impl Workspace {
     // }
 
     #[napi]
-    pub fn get_search_index(self: &Workspace) -> Vec<String> {
+    pub fn get_search_index(&self) -> Vec<String> {
         self.workspace.metadata().search_index
     }
 
     #[napi]
-    pub fn set_search_index(self: &Workspace, fields: Vec<String>) -> bool {
+    pub fn set_search_index(&self, fields: Vec<String>) -> bool {
         self.workspace.set_search_index(fields)
     }
 }
